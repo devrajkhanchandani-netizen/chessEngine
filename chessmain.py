@@ -64,17 +64,18 @@ def main():
                         player_clicks.append(selected_sq)
                     
                     if len(player_clicks) == 2:
-                        move = eng.Move(player_clicks[0], player_clicks[1], gs.board)
                         valid_moves = gs.getValidMoves()
+                        move_executed = False
                         
                         for v_move in valid_moves:
-                            if move.startRow == v_move.startRow and move.startCol == v_move.startCol and \
-                               move.endRow == v_move.endRow and move.endCol == v_move.endCol:
+                            if player_clicks[0] == (v_move.startRow, v_move.startCol) and \
+                               player_clicks[1] == (v_move.endRow, v_move.endCol):
                                 if v_move.isPawnPromotion:
                                     choice = get_promotion_choice(screen, gs.whiteToMove)
                                     gs.makeMove(v_move, choice)
                                 else:
                                     gs.makeMove(v_move)
+                                move_executed = True
                                 break
                             
                         selected_sq = ()

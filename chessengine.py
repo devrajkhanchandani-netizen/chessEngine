@@ -24,6 +24,8 @@ class GameState():
         self.bK_moved = False
         self.bR_left_moved = False
         self.bR_right_moved = False
+        
+        self.enpassantPossible = ()
 
     def makeMove(self, move, promo_choice='Q'):
         self.board[move.startRow][move.startCol] = "--"
@@ -37,6 +39,9 @@ class GameState():
             elif move.endCol == 2:
                 self.board[move.endRow][3] = self.board[move.endRow][0]
                 self.board[move.endRow][0] = "--"
+        elif move.isEnpassantMove:
+            self.board[move.endRow][move.endCol] = move.pieceMoved
+            self.board[move.startRow][move.endCol] = "--"
         else:
             self.board[move.endRow][move.endCol] = move.pieceMoved
 
@@ -48,6 +53,11 @@ class GameState():
         elif move.pieceMoved == 'bR':
             if move.startRow == 0 and move.startCol == 0: self.bR_left_moved = True
             elif move.startRow == 0 and move.startCol == 7: self.bR_right_moved = True
+
+        if move.pieceMoved[1] == 'P' and abs(move.startRow - move.endRow) == 2:
+            self.enpassantPossible = ((move.startRow + move.endRow) // 2, move.startCol)
+        else:
+            self.enpassantPossible = ()
 
         self.moveLog.append(move)
         if move.pieceCaptured != "--":
@@ -69,6 +79,10 @@ class GameState():
                 else:
                     self.captured_by_black.pop()
             
+            if move.isEnpassantMove:
+                self.board[move.endRow][move.endCol] = "--"
+                self.board[move.startRow][move.endCol] = move.pieceCaptured
+            
             self.wK_moved = False
             self.bK_moved = False
             self.wR_left_moved = False
@@ -85,6 +99,15 @@ class GameState():
                 elif m.pieceMoved == 'bR':
                     if m.startRow == 0 and m.startCol == 0: self.bR_left_moved = True
                     elif m.startRow == 0 and m.startCol == 7: self.bR_right_moved = True
+
+            if len(self.moveLog) > 0:
+                last_m = self.moveLog[-1]
+                if last_m.pieceMoved[1] == 'P' and abs(last_m.startRow - last_m.endRow) == 2:
+                    self.enpassantPossible = ((last_m.startRow + last_m.endRow) // 2, last_m.startCol)
+                else:
+                    self.enpassantPossible = ()
+            else:
+                self.enpassantPossible = ()
 
             if move.isCastleMove:
                 if move.endCol == 6:
@@ -126,6 +149,7 @@ class GameState():
         return False
 
     def getValidMoves(self):
+        temp_ep = self.enpassantPossible
         moves = self.getAllPossibleMoves(include_castle=True)
         for i in range(len(moves) - 1, -1, -1):
             self.makeMove(moves[i])
@@ -134,6 +158,7 @@ class GameState():
                 moves.remove(moves[i])
             self.whiteToMove = not self.whiteToMove
             self.undoMove()
+            self.enpassantPossible = temp_ep
         return moves
 
     def getAllPossibleMoves(self, include_castle=True):
@@ -164,20 +189,32 @@ class GameState():
                     moves.append(Move((r, c), (r-1, c), self.board))
                     if r == 6 and self.board[r-2][c] == "--":
                         moves.append(Move((r, c), (r-2, c), self.board))
-                if c-1 >= 0 and self.board[r-1][c-1][0] == 'b':
-                    moves.append(Move((r, c), (r-1, c-1), self.board))
-                if c+1 < 8 and self.board[r-1][c+1][0] == 'b':
-                    moves.append(Move((r, c), (r-1, c+1), self.board))
+                if c-1 >= 0:
+                    if self.board[r-1][c-1][0] == 'b':
+                        moves.append(Move((r, c), (r-1, c-1), self.board))
+                    elif (r-1, c-1) == self.enpassantPossible:
+                        moves.append(Move((r, c), (r-1, c-1), self.board, is_ep=True))
+                if c+1 < 8:
+                    if self.board[r-1][c+1][0] == 'b':
+                        moves.append(Move((r, c), (r-1, c+1), self.board))
+                    elif (r-1, c+1) == self.enpassantPossible:
+                        moves.append(Move((r, c), (r-1, c+1), self.board, is_ep=True))
         else:
             if r+1 < 8:
                 if self.board[r+1][c] == "--":
                     moves.append(Move((r, c), (r+1, c), self.board))
                     if r == 1 and self.board[r+2][c] == "--":
                         moves.append(Move((r, c), (r+2, c), self.board))
-                if c-1 >= 0 and self.board[r+1][c-1][0] == 'w':
-                    moves.append(Move((r, c), (r+1, c-1), self.board))
-                if c+1 < 8 and self.board[r+1][c+1][0] == 'w':
-                    moves.append(Move((r, c), (r+1, c+1), self.board))
+                if c-1 >= 0:
+                    if self.board[r+1][c-1][0] == 'w':
+                        moves.append(Move((r, c), (r+1, c-1), self.board))
+                    elif (r+1, c-1) == self.enpassantPossible:
+                        moves.append(Move((r, c), (r+1, c-1), self.board, is_ep=True))
+                if c+1 < 8:
+                    if self.board[r+1][c+1][0] == 'w':
+                        moves.append(Move((r, c), (r+1, c+1), self.board))
+                    elif (r+1, c+1) == self.enpassantPossible:
+                        moves.append(Move((r, c), (r+1, c+1), self.board, is_ep=True))
 
     def getRookMoves(self, r, c, moves):
         directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
@@ -276,7 +313,7 @@ class GameState():
 
 
 class Move():
-    def __init__(self, start_sq, end_sq, board, is_castle=False):
+    def __init__(self, start_sq, end_sq, board, is_castle=False, is_ep=False):
         self.startRow = start_sq[0]
         self.startCol = start_sq[1]
         self.endRow = end_sq[0]
@@ -284,6 +321,11 @@ class Move():
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.isCastleMove = is_castle
+        self.isEnpassantMove = is_ep
+        if not self.isEnpassantMove and self.pieceMoved[1] == 'P' and self.pieceCaptured == '--' and self.startCol != self.endCol:
+            self.isEnpassantMove = True
+        if self.isEnpassantMove:
+            self.pieceCaptured = 'bP' if self.pieceMoved == 'wP' else 'wP'
         self.isPawnPromotion = False
         if (self.pieceMoved == 'wP' and self.endRow == 0) or (self.pieceMoved == 'bP' and self.endRow == 7):
             self.isPawnPromotion = True
