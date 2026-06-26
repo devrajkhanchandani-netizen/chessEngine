@@ -1,6 +1,7 @@
 import pygame as p
 import chessengine as eng
 import sys
+import chessbrain as brain
 
 BOARD_SIZE = 512
 DIMENSIONS = 8
@@ -28,6 +29,9 @@ def main():
     white_time = 600 * 1000 
     black_time = 600 * 1000
 
+    player_one_human = True
+    player_two_bot = True
+
     running = True
     while running:
         time_passed = clock.tick(MAX_FPS)
@@ -45,11 +49,13 @@ def main():
                 print("White wins on time!")
                 running = False
 
+        human_turn = (gs.whiteToMove and player_one_human) or (not gs.whiteToMove and not player_two_bot)
+
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
             
-            elif e.type == p.MOUSEBUTTONDOWN:
+            elif e.type == p.MOUSEBUTTONDOWN and human_turn:
                 location = p.mouse.get_pos()
                 
                 col = (location[0] - LEFT_PADDING) // SQ_SIZE
@@ -65,7 +71,6 @@ def main():
                     
                     if len(player_clicks) == 2:
                         valid_moves = gs.getValidMoves()
-                        move_executed = False
                         
                         for v_move in valid_moves:
                             if player_clicks[0] == (v_move.startRow, v_move.startCol) and \
@@ -75,11 +80,18 @@ def main():
                                     gs.makeMove(v_move, choice)
                                 else:
                                     gs.makeMove(v_move)
-                                move_executed = True
                                 break
                             
                         selected_sq = ()
                         player_clicks = []
+
+        if not human_turn and running:
+            valid_moves = gs.getValidMoves()
+            bot_move = brain.findRandomMove(valid_moves)
+            if bot_move is not None:
+                gs.makeMove(bot_move, 'Q') 
+            else:
+                running = False
 
         drawGameState(screen, gs, white_time, black_time)
         p.display.flip()
