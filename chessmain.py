@@ -20,13 +20,36 @@ def main():
     p.display.set_caption("Chess Engine - Dashboard Mode")
     clock = p.time.Clock()
     gs = eng.GameState()
-    
+
+    selected_sq = ()  
+    player_clicks = []  
+
     running = True
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()
                 
+                col = (location[0] - LEFT_PADDING) // SQ_SIZE
+                row = (location[1] - TOP_PANEL_HEIGHT) // SQ_SIZE
+                
+                if 0 <= row < 8 and 0 <= col < 8:
+                    if selected_sq == (row, col):
+                        selected_sq = ()
+                        player_clicks = []
+                    else:
+                        selected_sq = (row, col)
+                        player_clicks.append(selected_sq)
+                    
+                    if len(player_clicks) == 2:
+                        move = eng.Move(player_clicks[0], player_clicks[1], gs.board)
+                        gs.makeMove(move)
+                        selected_sq = ()
+                        player_clicks = []
+
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
