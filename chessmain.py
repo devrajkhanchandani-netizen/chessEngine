@@ -70,7 +70,11 @@ def main():
                         for v_move in valid_moves:
                             if move.startRow == v_move.startRow and move.startCol == v_move.startCol and \
                                move.endRow == v_move.endRow and move.endCol == v_move.endCol:
-                                gs.makeMove(v_move)
+                                if v_move.isPawnPromotion:
+                                    choice = get_promotion_choice(screen, gs.whiteToMove)
+                                    gs.makeMove(v_move, choice)
+                                else:
+                                    gs.makeMove(v_move)
                                 break
                             
                         selected_sq = ()
@@ -80,9 +84,53 @@ def main():
         p.display.flip()
     p.quit()
 
+def get_promotion_choice(screen, is_white):
+    font = p.font.SysFont("Arial", 22, bold=True)
+    options = ['Q', 'R', 'B', 'N']
+    color_prefix = 'w' if is_white else 'b'
+    
+    panel_w = 320
+    panel_h = 80
+    panel_x = (WIDTH - panel_w) // 2
+    panel_y = (HEIGHT - panel_h) // 2
+    
+    button_w = 60
+    button_h = 50
+    spacing = 15
+    
+    buttons = []
+    for i, opt in enumerate(options):
+        bx = panel_x + 20 + i * (button_w + spacing)
+        by = panel_y + 15
+        buttons.append((p.Rect(bx, by, button_w, button_h), opt))
+        
+    choosing = True
+    while choosing:
+        for e in p.event.get():
+            if e.type == p.QUIT:
+                p.quit()
+                sys.exit()
+            elif e.type == p.MOUSEBUTTONDOWN:
+                mx, my = p.mouse.get_pos()
+                for rect, opt in buttons:
+                    if rect.collidepoint(mx, my):
+                        return opt
+                        
+        p.draw.rect(screen, p.Color("#1e1e1e"), (panel_x, panel_y, panel_w, panel_h))
+        p.draw.rect(screen, p.Color("#989795"), (panel_x, panel_y, panel_w, panel_h), 3)
+        
+        for rect, opt in buttons:
+            p.draw.rect(screen, p.Color("#3c3c3c"), rect)
+            p.draw.rect(screen, p.Color("#989795"), rect, 1)
+            
+            label = font.render(color_prefix + opt, True, p.Color("#FFFFFF") if is_white else p.Color("#000000"))
+            l_rect = label.get_rect(center=rect.center)
+            screen.blit(label, l_rect)
+            
+        p.display.flip()
+
 def drawGameState(screen, gs, w_time, b_time):
     screen.fill(p.Color("#262522")) 
-    
     drawBoard(screen)
     drawCoordinates(screen)
     drawPiecesText(screen, gs.board)
@@ -104,8 +152,8 @@ def drawCoordinates(screen):
     
     for c in range(DIMENSIONS):
         x_pos = c * SQ_SIZE + LEFT_PADDING + SQ_SIZE // 2
-        
         text_surface = font.render(files[c], True, text_color)
+        
         text_rect = text_surface.get_rect(center=(x_pos, TOP_PANEL_HEIGHT - 15))
         screen.blit(text_surface, text_rect)
         
@@ -114,8 +162,8 @@ def drawCoordinates(screen):
         
     for r in range(DIMENSIONS):
         y_pos = r * SQ_SIZE + TOP_PANEL_HEIGHT + SQ_SIZE // 2
-        
         text_surface = font.render(ranks[r], True, text_color)
+        
         text_rect = text_surface.get_rect(center=(LEFT_PADDING - 20, y_pos))
         screen.blit(text_surface, text_rect)
         

@@ -14,23 +14,22 @@ class GameState():
         self.moveLog = []
         self.checkmate = False
         self.stalemate = False
-        
         self.captured_by_white = []
         self.captured_by_black = []
-        
         self.piece_values = {'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 0}
 
-    def makeMove(self, move):
+    def makeMove(self, move, promo_choice='Q'):
         self.board[move.startRow][move.startCol] = "--"
-        self.board[move.endRow][move.endCol] = move.pieceMoved
+        if move.isPawnPromotion:
+            self.board[move.endRow][move.endCol] = move.pieceMoved[0] + promo_choice
+        else:
+            self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
-        
         if move.pieceCaptured != "--":
             if move.pieceMoved[0] == 'w':
                 self.captured_by_white.append(move.pieceCaptured)
             else:
                 self.captured_by_black.append(move.pieceCaptured)
-                
         self.whiteToMove = not self.whiteToMove
 
     def getValidMoves(self):
@@ -142,10 +141,8 @@ class GameState():
                     moves.append(Move((r, c), (end_row, end_col), self.board))
 
     def get_material_advantage(self):
-        """Returns ('w', score) if white is up, ('b', score) if black is up, or (None, 0)"""
         white_score = sum(self.piece_values[p[1]] for p in self.captured_by_white)
         black_score = sum(self.piece_values[p[1]] for p in self.captured_by_black)
-        
         if white_score > black_score:
             return 'w', white_score - black_score
         elif black_score > white_score:
@@ -161,3 +158,6 @@ class Move():
         self.endCol = end_sq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+        self.isPawnPromotion = False
+        if (self.pieceMoved == 'wP' and self.endRow == 0) or (self.pieceMoved == 'bP' and self.endRow == 7):
+            self.isPawnPromotion = True
