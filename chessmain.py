@@ -46,7 +46,14 @@ def main():
                     
                     if len(player_clicks) == 2:
                         move = eng.Move(player_clicks[0], player_clicks[1], gs.board)
-                        gs.makeMove(move)
+                        valid_moves = gs.getValidMoves()
+                        
+                        for v_move in valid_moves:
+                            if move.startRow == v_move.startRow and move.startCol == v_move.startCol and \
+                               move.endRow == v_move.endRow and move.endCol == v_move.endCol:
+                                gs.makeMove(v_move)
+                                break
+                            
                         selected_sq = ()
                         player_clicks = []
 
