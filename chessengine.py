@@ -14,11 +14,23 @@ class GameState():
         self.moveLog = []
         self.checkmate = False
         self.stalemate = False
+        
+        self.captured_by_white = []
+        self.captured_by_black = []
+        
+        self.piece_values = {'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 0}
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
+        
+        if move.pieceCaptured != "--":
+            if move.pieceMoved[0] == 'w':
+                self.captured_by_white.append(move.pieceCaptured)
+            else:
+                self.captured_by_black.append(move.pieceCaptured)
+                
         self.whiteToMove = not self.whiteToMove
 
     def getValidMoves(self):
@@ -128,6 +140,18 @@ class GameState():
                 end_piece = self.board[end_row][end_col]
                 if end_piece[0] != ally_color:
                     moves.append(Move((r, c), (end_row, end_col), self.board))
+
+    def get_material_advantage(self):
+        """Returns ('w', score) if white is up, ('b', score) if black is up, or (None, 0)"""
+        white_score = sum(self.piece_values[p[1]] for p in self.captured_by_white)
+        black_score = sum(self.piece_values[p[1]] for p in self.captured_by_black)
+        
+        if white_score > black_score:
+            return 'w', white_score - black_score
+        elif black_score > white_score:
+            return 'b', black_score - white_score
+        return None, 0
+
 
 class Move():
     def __init__(self, start_sq, end_sq, board):
