@@ -87,7 +87,7 @@ def main():
 
         if not human_turn and running:
             valid_moves = gs.getValidMoves()
-            bot_move = brain.findRandomMove(valid_moves)
+            bot_move = brain.findBestMove(gs, valid_moves)
             if bot_move is not None:
                 gs.makeMove(bot_move, 'Q') 
             else:
