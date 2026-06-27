@@ -1,4 +1,82 @@
-i have just recently learnt DSA and ML and this project is my attempt to test out my skills, all the commits with their history and what they include extra will be defined below
+i have just recently learnt DSA and ML and this project is my attempt to test out my skills, all the commits with their history and what they include will be defined below along with the architecture & system design, installation & setup run guide and features roadmap
+
+
+---
+
+
+**Module Breakdown**
+
+
+1. chessmain.py
+   
+   this is the main entry point of the app. it manages the Pygame event loop, caps the frame rate at 60 FPS, and handles user interactions
+   
+
+   how it works: it translates raw screen coordinate clicks into board matrix rows and columns (col = (mx - PADDING) // SQ_SIZE).
+
+   threading architecture: to prevent the OS from thinking the app crashed during heavy calculations, it offloads the deep alpha-beta lookahead search loops to a       background worker thread. this keeps the primary thread free to smoothly render the UI animations, real-time match timers (MM:SS:mmm), and move history sidebars.
+
+
+2. chessengine.py
+   
+   this module behaves as the single source of truth for the game state. it knows absolutely nothing about graphics or AI heuristics—it just strictly enforces the laws of chess.
+
+   
+   how it works: the board layout is tracked using an internal 8×8 2D matrix array where strings represent pieces (e.g., 'wR' for White Rook, '--' for empty cells).
+
+   state tracking & rollbacks: it contains the move execution loop (makeMove) and the state history stack (undoMove). when a move is rolled back, the engine pops the last transaction off the history stack and re-synchronizes the piece matrices, turn tracking booleans, castling rights logs, and en passant vulnerabilities perfectly.
+
+
+3. chessbrain.py
+   
+   this is the heavy-lifting optimization layer where the bot actually figures out what to play. it parses the game tree recursively to uncover the highest-value lines.
+
+   
+   how it works: it implements a Minimax tree-traversal structure optimized by an Alpha-Beta pruning loop. it scores the terminal states using a relative material weight lookup dictionary.
+   optimization pipeline: to prevent the exponential explosion of checking millions of bad branches, it runs an internal orderMoves method. by sorting moves based on an MVV-LVA (Most Valuable Victim - Least Valuable Attacker) heuristic scale, it pushes high-priority tactical events like captures and pawn promotions to the front of the call stack. this guarantees that the alpha-beta bounds snap shut instantly, keeping the engine lightning fast even at 6 plies deep.
+
+
+---
+
+
+**Installation & Quick Start**
+
+to spin up the dashboard and play against the bot locally, clone the repo and run the presentation script
+
+Prerequisites:-
+make sure you have python installed along with the pygame framework wrapper
+
+pip install pygame
+
+
+
+clone the repository:- 
+
+git clone [https://github.com/devrajkhanchandani-netizen/chessEngine.git](https://github.com/devrajkhanchandani-netizen/chessEngine.git)
+
+cd chessEngine
+
+launch the interactive dashboard
+
+python chessmain.py
+
+
+---
+
+
+**Next Steps & Optimization Roadmap**
+
+   the core engine is highly stable, but there are a few advanced algorithmic upgrades i am planning to implement next to push the search depth past 6 plies:
+
+   1. [ ] Quiescence Search: adding an unstable state lookup function at the horizon layer to evaluate trailing captures, permanently killing the Horizon Effect where the bot hangs pieces on deep plies.
+   2. [ ] Zobrist Hashing & Transposition Tables: building a custom hashing matrix to assign unique 64-bit keys to board layouts. this lets the engine cache previously evaluated positions in a hash table so it never re-calculates duplicate positions across different branches.
+   3. [ ] Bitboards Migration: refactoring the core state manager away from standard 2D Python list arrays into 64-bit primitive integers (2^64 bitmasks) to handle move generation via ultra-fast bitwise operators.
+
+
+---
+
+
+**Development Logs**
 
 
 1. initialize board matrix, translation layout structures and basic move execution:-
