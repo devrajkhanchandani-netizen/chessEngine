@@ -43,7 +43,7 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
 
 5. long/short castling integration:-
 
-  this version adds full move validation for both king-side and queen-side castling, making sure the engine strictly obeys all standard rule constraints and king safety checks
+   this version adds full move validation for both king-side and queen-side castling, making sure the engine strictly obeys all standard rule constraints and king safety checks
 
    * capabilities introduced -
      1. implemented path-clearance loops to verify that every square between the king and the target rook is completely empty
@@ -53,7 +53,7 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
 
 6. En Passant integration:-
 
-  this version handles the tricky mechanics of en passant captures by tracking temporary pawn vulnerabilities across consecutive game moves
+   this version handles the tricky mechanics of en passant captures by tracking temporary pawn vulnerabilities across consecutive game moves
 
    * capabilities introduced -
      1. engineered a dynamic enPassantPossible tuple tracker to temporarily store the target square coordinates behind any pawn that just pulled a 2-square initial sprint
@@ -62,7 +62,8 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
 
 
 7. Random move generation:-
-  this version sets up a basic automated testing bot that plays random legal moves to stress-test the state stability and catch bugs before building out the search tree
+
+   this version sets up a basic automated testing bot that plays random legal moves to stress-test the state stability and catch bugs before building out the search tree
   
    * capabilities introduced -
      1. hooked up a pseudo-random choice selector inside the primary execution loop to pick an arbitrary move out of the filtered valid moves array
@@ -70,9 +71,9 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
      3. verified basic piece routing rules by making sure random selections still respect board boundaries and piece-specific move vectors
 
 
-8. uses recursion to look 2 moves deep:-
+9. uses recursion to look 2 moves deep:-
   
-  this version upgrades the bot from a random picker to a basic lookahead engine by introducing a recursive tree search to evaluate immediate future positions
+   this version upgrades the bot from a random picker to a basic lookahead engine by introducing a recursive tree search to evaluate immediate future positions
   
    * capabilities introduced -
      1. developed a recursive search function that executes a move, drills down to check the opponent's responses, and rewinds the board state using undoMove
@@ -82,7 +83,7 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
 
 9. uses alpha-beta pruning and minimax algorithm to look 3 moves deep:-
   
-  this version optimizes the search framework by pairing the minimax algorithm with alpha-beta bounds to aggressively cut off dead branches early
+   this version optimizes the search framework by pairing the minimax algorithm with alpha-beta bounds to aggressively cut off dead branches early
   
    * capabilities introduced -
      1. structured a standard maximizer/minimizer adversarial loop where the bot optimizes its own score while assuming the opponent will play the absolute best counter-move
@@ -92,7 +93,7 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
 
 10. implemented advanced move ordering and conked up search depth to 6 piles deep:-
   
-  this version massively accelerates tree traversal times by sorting the move queue, forcing quick alpha-beta cutoffs and maximizing the overall search depth
+   this version massively accelerates tree traversal times by sorting the move queue, forcing quick alpha-beta cutoffs and maximizing the overall search depth
 
    * capabilities introduced -
      1. built a dedicated orderMoves sorting function that pushes high-value tactical moves like captures and promotions to the front of the evaluation queue
@@ -102,7 +103,7 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
 
 11. added history, undo and resign buttons, changed time format and added threading:-
   
-  this version rewrites the Pygame application into a clean, multi-threaded layout complete with interactive dashboard widgets and a high-precision match timer
+   this version rewrites the Pygame application into a clean, multi-threaded layout complete with interactive dashboard widgets and a high-precision match timer
   
    * capabilities introduced -
      1. offloaded the heavy alpha-beta search logic from the main UI thread onto a background thread, preventing the Pygame window from freezing during deep calculations
