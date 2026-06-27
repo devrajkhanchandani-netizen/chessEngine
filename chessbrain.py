@@ -6,8 +6,21 @@ def findBestMove(gs, valid_moves):
     global next_move
     next_move = None
     random.shuffle(valid_moves)
-    findMoveAlphaBeta(gs, valid_moves, 3, -float('inf'), float('inf'), gs.whiteToMove)
+    orderMoves(valid_moves)
+    findMoveAlphaBeta(gs, valid_moves, 4, -float('inf'), float('inf'), gs.whiteToMove)
     return next_move
+
+def orderMoves(moves):
+    def move_priority(move):
+        score = 0
+        if move.pieceCaptured != "--":
+            score += PIECE_SCORE[move.pieceCaptured[1]] * 10 - PIECE_SCORE[move.pieceMoved[1]]
+        if move.isPawnPromotion:
+            score += 900
+        if move.isCastleMove:
+            score += 50
+        return score
+    moves.sort(key=move_priority, reverse=True)
 
 def findMoveAlphaBeta(gs, valid_moves, depth, alpha, beta, white_to_move):
     global next_move
@@ -19,10 +32,11 @@ def findMoveAlphaBeta(gs, valid_moves, depth, alpha, beta, white_to_move):
         for move in valid_moves:
             gs.makeMove(move)
             next_valid_moves = gs.getValidMoves()
+            orderMoves(next_valid_moves)
             score = findMoveAlphaBeta(gs, next_valid_moves, depth - 1, alpha, beta, False)
             if score > max_score:
                 max_score = score
-                if depth == 3:
+                if depth == 4:
                     next_move = move
             gs.undoMove()
             alpha = max(alpha, max_score)
@@ -35,10 +49,11 @@ def findMoveAlphaBeta(gs, valid_moves, depth, alpha, beta, white_to_move):
         for move in valid_moves:
             gs.makeMove(move)
             next_valid_moves = gs.getValidMoves()
+            orderMoves(next_valid_moves)
             score = findMoveAlphaBeta(gs, next_valid_moves, depth - 1, alpha, beta, True)
             if score < min_score:
                 min_score = score
-                if depth == 3:
+                if depth == 4:
                     next_move = move
             gs.undoMove()
             beta = min(beta, min_score)

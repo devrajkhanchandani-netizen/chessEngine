@@ -200,18 +200,19 @@ def drawPiecesText(screen, board):
                 screen.blit(text_surface, text_surface.get_rect(center=(x, y)))
 
 def format_time(ms):
-    seconds = int(ms // 1000)
-    minutes = seconds // 60
-    rem_seconds = seconds % 60
-    return f"{minutes:02d}:{rem_seconds:02d}"
+    total_seconds = int(ms // 1000)
+    minutes = total_seconds // 60
+    seconds = total_seconds % 60
+    milliseconds = int(ms % 1000)
+    return f"{minutes:02d}:{seconds:02d}:{milliseconds:03d}"
 
 def drawDashboard(screen, gs, w_time, b_time):
-    font_timer = p.font.SysFont("Courier", 32, bold=True)
+    font_timer = p.font.SysFont("Courier", 24, bold=True)
     font_ui = p.font.SysFont("Arial", 16, bold=True)
     
     b_timer_color = p.Color("#FF5555") if not gs.whiteToMove else p.Color("#AAAAAA")
     b_time_surf = font_timer.render(format_time(b_time), True, b_timer_color)
-    screen.blit(b_time_surf, (WIDTH - RIGHT_PADDING - 120, 25))
+    screen.blit(b_time_surf, (WIDTH - RIGHT_PADDING - 150, 25))
     
     white_captured_str = " ".join([p[1] for p in gs.captured_by_white])
     cap_w_surf = font_ui.render(f"Captured by White: {white_captured_str}", True, p.Color("#EEEDF2"))
@@ -224,7 +225,7 @@ def drawDashboard(screen, gs, w_time, b_time):
 
     w_timer_color = p.Color("#FF5555") if gs.whiteToMove else p.Color("#AAAAAA")
     w_time_surf = font_timer.render(format_time(w_time), True, w_timer_color)
-    screen.blit(w_time_surf, (WIDTH - RIGHT_PADDING - 120, HEIGHT - BOTTOM_PANEL_HEIGHT + 25))
+    screen.blit(w_time_surf, (WIDTH - RIGHT_PADDING - 150, HEIGHT - BOTTOM_PANEL_HEIGHT + 25))
     
     black_captured_str = " ".join([p[1] for p in gs.captured_by_black])
     cap_b_surf = font_ui.render(f"Captured by Black: {black_captured_str}", True, p.Color("#111111"))
