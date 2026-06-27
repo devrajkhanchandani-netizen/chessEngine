@@ -39,3 +39,6 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
      1. initialized a master router loop (getAllPossibleMoves) to scan the given chess grid, check the piece, and pipe the data to its specific validation function
      2. programmed continuous raycasting direction vectors for rooks, bishops, and queens that slide outward until blocked by board boundaries, friendly elements and/or terminal enemy captures
      3. mapped step matrices for kings and knights alongside directional translation paths for W&B pawns to evaluate initial two step sprints and diagonal capture scenarios
+
+
+5. 
