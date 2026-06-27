@@ -51,7 +51,6 @@ i have just recently learnt DSA and ML and this project is my attempt to test ou
      3. deployed persistent boolean tracking flags (hasKingMoved, hasRookMoved) inside the game state class to permanently kill castling rights once a piece moves
      
 
-
 6. En Passant integration:-
 
   this version handles the tricky mechanics of en passant captures by tracking temporary pawn vulnerabilities across consecutive game moves
