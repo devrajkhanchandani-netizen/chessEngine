@@ -3,49 +3,48 @@ import random
 PIECE_SCORE = {"K": 0, "Q": 900, "R": 500, "B": 300, "N": 300, "P": 100}
 
 def findBestMove(gs, valid_moves):
-    best_move = None
+    global next_move
+    next_move = None
     random.shuffle(valid_moves)
-    
-    if gs.whiteToMove:
-        best_score = -float('inf')
-        for move in valid_moves:
-            gs.makeMove(move)
-            score = bruteForceSearch(gs, 1)
-            if score > best_score:
-                best_score = score
-                best_move = move
-            gs.undoMove()
-    else:
-        best_score = float('inf')
-        for move in valid_moves:
-            gs.makeMove(move)
-            score = bruteForceSearch(gs, 1)
-            if score < best_score:
-                best_score = score
-                best_move = move
-            gs.undoMove()
-            
-    return best_move
+    findMoveAlphaBeta(gs, valid_moves, 3, -float('inf'), float('inf'), gs.whiteToMove)
+    return next_move
 
-def bruteForceSearch(gs, depth_current):
-    if depth_current == 2:
+def findMoveAlphaBeta(gs, valid_moves, depth, alpha, beta, white_to_move):
+    global next_move
+    if depth == 0 or len(valid_moves) == 0:
         return scoreBoard(gs)
-        
-    valid_moves = gs.getValidMoves()
-    if len(valid_moves) == 0:
-        return scoreBoard(gs)
-        
-    scores = []
-    for move in valid_moves:
-        gs.makeMove(move)
-        score = bruteForceSearch(gs, depth_current + 1)
-        scores.append(score)
-        gs.undoMove()
-        
-    if gs.whiteToMove:
-        return max(scores)
+
+    if white_to_move:
+        max_score = -float('inf')
+        for move in valid_moves:
+            gs.makeMove(move)
+            next_valid_moves = gs.getValidMoves()
+            score = findMoveAlphaBeta(gs, next_valid_moves, depth - 1, alpha, beta, False)
+            if score > max_score:
+                max_score = score
+                if depth == 3:
+                    next_move = move
+            gs.undoMove()
+            alpha = max(alpha, max_score)
+            if alpha >= beta:
+                break
+        return max_score
+
     else:
-        return min(scores)
+        min_score = float('inf')
+        for move in valid_moves:
+            gs.makeMove(move)
+            next_valid_moves = gs.getValidMoves()
+            score = findMoveAlphaBeta(gs, next_valid_moves, depth - 1, alpha, beta, True)
+            if score < min_score:
+                min_score = score
+                if depth == 3:
+                    next_move = move
+            gs.undoMove()
+            beta = min(beta, min_score)
+            if alpha >= beta:
+                break
+        return min_score
 
 def scoreBoard(gs):
     score = 0
