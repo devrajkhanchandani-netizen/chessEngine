@@ -322,10 +322,34 @@ class Move():
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.isCastleMove = is_castle
         self.isEnpassantMove = is_ep
+        
         if not self.isEnpassantMove and self.pieceMoved[1] == 'P' and self.pieceCaptured == '--' and self.startCol != self.endCol:
             self.isEnpassantMove = True
+            
         if self.isEnpassantMove:
             self.pieceCaptured = 'bP' if self.pieceMoved == 'wP' else 'wP'
+            
         self.isPawnPromotion = False
         if (self.pieceMoved == 'wP' and self.endRow == 0) or (self.pieceMoved == 'bP' and self.endRow == 7):
             self.isPawnPromotion = True
+
+    def getNotation(self):
+        if self.isCastleMove:
+            return "O-O" if self.endCol == 6 else "O-O-O"
+        
+        files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+        ranks = ['8', '7', '6', '5', '4', '3', '2', '1']
+        
+        end_square = files[self.endCol] + ranks[self.endRow]
+        piece_letter = self.pieceMoved[1]
+        
+        if piece_letter == 'P':
+            if self.pieceCaptured != '--' or self.isEnpassantMove:
+                return files[self.startCol] + "x" + end_square
+            return end_square
+            
+        notation = piece_letter
+        if self.pieceCaptured != '--':
+            notation += "x"
+        notation += end_square
+        return notation

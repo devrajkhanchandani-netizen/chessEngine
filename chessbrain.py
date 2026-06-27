@@ -22,43 +22,71 @@ def orderMoves(moves):
         return score
     moves.sort(key=move_priority, reverse=True)
 
-def findMoveAlphaBeta(gs, valid_moves, depth, alpha, beta, white_to_move):
+def findMoveAlphaBeta(gs, moves, depth, alpha, beta, white_to_move):
     global next_move
-    if depth == 0 or len(valid_moves) == 0:
+    if depth == 0 or len(moves) == 0:
         return scoreBoard(gs)
 
     if white_to_move:
         max_score = -float('inf')
-        for move in valid_moves:
+        legal_move_count = 0
+        for move in moves:
             gs.makeMove(move)
-            next_valid_moves = gs.getValidMoves()
-            orderMoves(next_valid_moves)
-            score = findMoveAlphaBeta(gs, next_valid_moves, depth - 1, alpha, beta, False)
+            gs.whiteToMove = not gs.whiteToMove
+            if gs.inCheck():
+                gs.whiteToMove = not gs.whiteToMove
+                gs.undoMove()
+                continue
+            gs.whiteToMove = not gs.whiteToMove
+            legal_move_count += 1
+            
+            next_moves = gs.getAllPossibleMoves(include_castle=True)
+            orderMoves(next_moves)
+            score = findMoveAlphaBeta(gs, next_moves, depth - 1, alpha, beta, False)
+            gs.undoMove()
+            
             if score > max_score:
                 max_score = score
                 if depth == 4:
                     next_move = move
-            gs.undoMove()
             alpha = max(alpha, max_score)
             if alpha >= beta:
                 break
+        if legal_move_count == 0:
+            if gs.inCheck():
+                return -100000 + (4 - depth)
+            return 0
         return max_score
 
     else:
         min_score = float('inf')
-        for move in valid_moves:
+        legal_move_count = 0
+        for move in moves:
             gs.makeMove(move)
-            next_valid_moves = gs.getValidMoves()
-            orderMoves(next_valid_moves)
-            score = findMoveAlphaBeta(gs, next_valid_moves, depth - 1, alpha, beta, True)
+            gs.whiteToMove = not gs.whiteToMove
+            if gs.inCheck():
+                gs.whiteToMove = not gs.whiteToMove
+                gs.undoMove()
+                continue
+            gs.whiteToMove = not gs.whiteToMove
+            legal_move_count += 1
+            
+            next_moves = gs.getAllPossibleMoves(include_castle=True)
+            orderMoves(next_moves)
+            score = findMoveAlphaBeta(gs, next_moves, depth - 1, alpha, beta, True)
+            gs.undoMove()
+            
             if score < min_score:
                 min_score = score
                 if depth == 4:
                     next_move = move
-            gs.undoMove()
             beta = min(beta, min_score)
             if alpha >= beta:
                 break
+        if legal_move_count == 0:
+            if gs.inCheck():
+                return 100000 - (4 - depth)
+            return 0
         return min_score
 
 def scoreBoard(gs):
